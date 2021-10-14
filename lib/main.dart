@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:pdf/pdf.dart';
+
 import 'package:pdf/widgets.dart' as pw;
 
 void main() {
@@ -58,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           IconButton(
               onPressed: () async {
-                await getImagesGallery();
+                await getImagesSync();
               },
               icon: Icon(Icons.camera))
         ],
@@ -92,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
 //       .showSnackBar(SnackBar(content: Text(error.message!)));
 // }
 
-Future getImagesGallery() async {
+Future getImagesPdf() async {
   var image = await ImagePicker()
       .pickImage(source: ImageSource.camera, imageQuality: 40);
   // final PdfDocument document = PdfDocument();
@@ -117,6 +117,29 @@ Future getImagesGallery() async {
 
     var doc =
         await File('$output/ImageToPDF.pdf').writeAsBytes(await pdf.save());
+
+    OpenFile.open(doc.path);
+  }
+}
+
+Future getImagesSync() async {
+  var image = await ImagePicker()
+      .pickImage(source: ImageSource.camera, imageQuality: 40);
+  final PdfDocument document = PdfDocument();
+  Directory tempDir = await getTemporaryDirectory();
+  String output = tempDir.path;
+  if (image != null) {
+    // OpenFile.open(image.path);
+    final Uint8List imageData = File(image.path).readAsBytesSync();
+    final PdfBitmap imagem = PdfBitmap(imageData);
+
+    document.pages
+        .add()
+        .graphics
+        .drawImage(imagem, const Rect.fromLTWH(0, 0, 500, 800));
+
+    var doc =
+        await File('$output/ImageToPDF.pdf').writeAsBytes(document.save());
 
     OpenFile.open(doc.path);
   }
