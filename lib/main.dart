@@ -17,11 +17,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      theme: ThemeData(primaryColor: Color(0xff39496B)),
+      home: MyHomePage(title: 'Teste PDF'),
     );
   }
 }
@@ -36,87 +35,61 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    // FlutterGeniusScan.scanWithConfiguration({
-    //   'source': 'camera',
-    //   'multiPage': false,
-    // }).then((result) {
-    //   print(result);
-    //   String pdfUrl = result['pdfUrl'];
-    //   OpenFile.open(pdfUrl.replaceAll("file://", '')).then(
-    //       (result) => debugPrint(result.message),
-    //       onError: (error) => displayError(context, error));
-    // }, onError: (error) => displayError(context, error));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: [
-          IconButton(
-              onPressed: () async {
-                await getImagesSync();
-              },
-              icon: Icon(Icons.camera))
-        ],
+        backgroundColor: Color(0xff39496B),
         title: Text(widget.title),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+            TextButton(
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.orange)),
+              child: Text(
+                'lib pdf',
+                style: TextStyle(color: Colors.white),
+              ),
+              onPressed: () async {
+                await getImagesPdf();
+              },
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+            Padding(padding: EdgeInsets.all(10)),
+            TextButton(
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.orange)),
+              child:
+                  Text('lib syncfusion', style: TextStyle(color: Colors.white)),
+              onPressed: () async {
+                await getImagesSync();
+              },
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
       ),
     );
   }
 }
 
-// void displayError(BuildContext context, PlatformException error) {
-//   ScaffoldMessenger.of(context)
-//       .showSnackBar(SnackBar(content: Text(error.message!)));
-// }
-
 Future getImagesPdf() async {
   var image = await ImagePicker()
       .pickImage(source: ImageSource.camera, imageQuality: 40);
-  // final PdfDocument document = PdfDocument();
   Directory tempDir = await getTemporaryDirectory();
   String output = tempDir.path;
   if (image != null) {
-    // OpenFile.open(image.path);
     final imageData = pw.MemoryImage(File(image.path).readAsBytesSync());
-    // final PdfBitmap imagem = PdfBitmap(imageData);
     final pdf = pw.Document();
 
     pdf.addPage(pw.Page(build: (pw.Context context) {
       return pw.Center(
         child: pw.Image(imageData),
-      ); // Center
+      );
     }));
 
-    // document.pages
-    //     .add()
-    //     .graphics
-    //     .drawImage(imagem, const Rect.fromLTWH(0, 0, 500, 800));
-
-    var doc =
-        await File('$output/ImageToPDF.pdf').writeAsBytes(await pdf.save());
+    var doc = await File('$output/libpdf.pdf').writeAsBytes(await pdf.save());
 
     OpenFile.open(doc.path);
   }
@@ -129,7 +102,6 @@ Future getImagesSync() async {
   Directory tempDir = await getTemporaryDirectory();
   String output = tempDir.path;
   if (image != null) {
-    // OpenFile.open(image.path);
     final Uint8List imageData = File(image.path).readAsBytesSync();
     final PdfBitmap imagem = PdfBitmap(imageData);
 
@@ -138,8 +110,7 @@ Future getImagesSync() async {
         .graphics
         .drawImage(imagem, const Rect.fromLTWH(0, 0, 500, 800));
 
-    var doc =
-        await File('$output/ImageToPDF.pdf').writeAsBytes(document.save());
+    var doc = await File('$output/libsync.pdf').writeAsBytes(document.save());
 
     OpenFile.open(doc.path);
   }
